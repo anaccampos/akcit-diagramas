@@ -1,0 +1,11 @@
+sequenceDiagram
+    actor Pessoa
+    participant Web as Dashboard
+    participant API
+    participant Banco as PostgreSQL
+    Pessoa->>Web: Autenticar e selecionar filtros
+    Web->>API: Consultar indicadores
+    API->>Banco: Consultar histórico
+    Banco-->>API: Agregações
+    API-->>Web: Indicadores
+    Web-->>Pessoa: Exibir resultados

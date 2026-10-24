@@ -1,0 +1,46 @@
+sequenceDiagram
+    autonumber
+    actor Pessoa as Pessoa usuária
+    participant Web as Aplicação web
+    participant IdP as Provedor OIDC
+    participant API as API analítica
+    participant Banco as PostgreSQL
+    Note over Web,Banco: Histórico de vários anos disponível para consulta
+    Pessoa->>Web: Acessar o dashboard
+    Web->>IdP: Iniciar login com Authorization Code e PKCE
+    Pessoa->>IdP: Autenticar no provedor
+    IdP-->>Web: Retornar código de autorização
+    Web->>IdP: Trocar código com code_verifier
+    IdP-->>Web: Token de acesso
+    Note over Web,IdP: Fluxo resumido de login. Não detalha todos os redirecionamentos
+    Pessoa->>Web: Selecionar intervalo e demais filtros
+    Web->>API: POST /analytics/summary com Bearer token
+    API->>API: Validar assinatura, emissor, audiência e expiração
+    Note over IdP,API: Chaves públicas obtidas do provedor e mantidas em cache
+    alt Token ausente, inválido ou expirado
+        API-->>Web: HTTP 401
+        Web-->>Pessoa: Solicitar autenticação
+    else Token válido
+        API->>API: Verificar permissão de consulta
+        alt Sem permissão
+            API-->>Web: HTTP 403
+            Web-->>Pessoa: Informar acesso não autorizado
+        else Acesso permitido
+            API->>API: Validar intervalo e filtros
+            alt Filtros inválidos
+                API-->>Web: HTTP 400
+                Web-->>Pessoa: Solicitar correção dos filtros
+            else Filtros válidos
+                API->>Banco: Consultar catálogo e agregar dados por filtros
+                alt Consulta concluída
+                    Banco-->>API: Indicadores e cobertura do período
+                    API-->>Web: HTTP 200 / JSON
+                    Web-->>Pessoa: Exibir indicadores e cobertura
+                else Banco indisponível ou timeout
+                    Banco-->>API: Falha de execução
+                    API-->>Web: HTTP 503 e identificador da requisição
+                    Web-->>Pessoa: Informar indisponibilidade temporária
+                end
+            end
+        end
+    end

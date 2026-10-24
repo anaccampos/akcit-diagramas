@@ -1,0 +1,23 @@
+flowchart TB
+    pessoa["Pessoa usuária<br/>Acesso autenticado"]
+    identidade["Provedor de identidade<br/>OpenID Connect<br/>Autenticação e emissão de tokens"]
+    carga["Processo externo de atualização<br/>Mantém o histórico disponível<br/>Detalhamento fora do escopo"]
+    subgraph sistema["DataSUS Quimioterapia — arquitetura proposta"]
+        web["Aplicação web<br/>Next.js / React / TypeScript<br/>Filtros, indicadores e exportação"]
+        api["API analítica<br/>Fastify / TypeScript<br/>Validação de acesso e filtros<br/>Consultas e agregações"]
+        banco[("PostgreSQL<br/>Dados de vários anos<br/>Catálogo de competências disponíveis")]
+    end
+    pessoa -->|"Consulta e navegação"| web
+    web -->|"Login OIDC com PKCE"| identidade
+    web -->|"HTTPS / JSON e token de acesso"| api
+    api -->|"Obtém chaves públicas<br/>para validar tokens localmente"| identidade
+    api -->|"SQL parametrizado<br/>Credencial de leitura"| banco
+    carga -->|"Atualiza dados e catálogo<br/>Credencial de escrita separada"| banco
+    classDef app fill:#dbeafe,stroke:#1d4ed8,color:#172033
+    classDef storage fill:#dcfce7,stroke:#15803d,color:#172033
+    classDef external fill:#f1f5f9,stroke:#64748b,color:#172033
+    classDef actor fill:#fef3c7,stroke:#92400e,color:#172033
+    class web,api app
+    class banco storage
+    class identidade,carga external
+    class pessoa actor

@@ -1,0 +1,5 @@
+flowchart LR
+    pessoa["Pessoa usuária"] --> web["Dashboard"]
+    web --> identidade["Autenticação"]
+    web --> api["API TypeScript"]
+    api --> banco[("PostgreSQL<br/>Histórico de vários anos")]

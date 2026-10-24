@@ -1,0 +1,12 @@
+{
+  "name": "akcit-diagramas-datasus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Documentação arquitetural do DataSUS Quimioterapia — Unidade III",
+  "scripts": {
+    "diagrams": "node scripts/render.mjs"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "11.12.0"
+  }
+}
